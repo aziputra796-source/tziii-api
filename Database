@@ -1,57 +1,22 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>ROCKSTAR DATABASE</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+<title>FIB - Federal Investigation Bureau</title>
 <style>
-body{background:black;color:#00ff66;font-family:monospace;padding:20px;overflow:hidden}
-#t{white-space:pre-wrap;font-size:14px;line-height:18px}
-.blink{animation:blink 1s infinite}@keyframes blink{50%{opacity:0}}
-</style>
-</head>
-<body>
-<div id="t"></div>
-<script>
-const lines = [
-"ROCKSTAR GAMES DATABASE ACCESS v3.7.12 // SECURE CONNECTION",
-"------------------------------------------------------------",
-"STATUS: BREACH IN PROGRESS",
-"CONNECTION: ESTABLISHED TO FIB CENTRAL DATABASE [Los Santos]",
-"IP: 192.168.0.77 | NODE: LS-FIB-09",
-"ENCRYPTION: RSA-2048.. BYPASSED [OK]",
-"",
-">>> LOADING FIB FILES...",
-"[████████████████████░░░░░░] 78%",
-"LOADING: FIB_CASE_004892 -- CITIZEN RECORDS // LOS SANTOS REGION",
-"> Decrypting security layer...",
-"> Accessing citizen database records...",
-"> Retrieving record: CID-18473 - JOHN MARSTON - BLAINE COUNTY",
-"> Retrieving record: CID-22791 - TREVOR PHILLIPS - WANTED LEVEL 5",
-"> Retrieving record: CID-09922 - MICHAEL DE SANTA - WITNESS PROTECTION",
-"",
-">>> CITIZEN RECORDS DATABASE",
-"RECORD NAME CLASS LOCATION FLAG",
-"18473 MARSTON, J. CIVILIAN BLAINE COUNTY CLEAN",
-"22791 PHILLIPS, T. PERSON OF INTEREST SANDY SHORES ARMED/DANGEROUS",
-"09922 DE SANTA, M. PROTECTED ROCKFORD HILLS PROTECTED",
-"",
-"[DIAGNOSTICS] CPU: 92% | MEMORY: 6.4GB / 8.0GB | FIREWALL: DOWN",
-"TRACE BLOCK: ACTIVE (12:04) - DO NOT DISCONNECT",
-"",
-"SYSTEM: FIB DATABASE v3.7.12 | SESSION TIME: 00:14:32 | ROOT ACCESS GRANTED",
-"WARNING: UNAUTHORIZED ACCESS IS PROSECUTED UNDER SAN ANDREAS CODE 502",
-"",
-"HACK IN PROGRESS... 78% COMPLETE _"
-];
-let i=0,j=0;
-function type(){
- if(i>=lines.length) return;
- if(j<=lines[i].length){
-  document.getElementById("t").innerHTML = lines.slice(0,i).join("\n")+"\n"+lines[i].slice(0,j)+"<span class='blink'>█</span>";
-  j++;
-  setTimeout(type, 30);
- } else { i++; j=0; setTimeout(type, 200); }
-}
-type();
-</script>
-</body>
-</html>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Share Tech Mono',monospace}
+body{background:#000;color:#00ff66;overflow:hidden;height:100vh}
+#scanline{position:fixed;top:0;left:0;width:100%;height:100%;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,255,102,.05) 2px,rgba(0,255,102,.05) 4px);pointer-events:none;z-index:99}
+.top{background:#ffcc00;color:#000;padding:8px 15px;display:flex;justify-content:space-between;font-weight:bold;font-size:14px}
+.top2{background:#0a1a0a;border:1px solid #00ff66;padding:8px 15px;display:flex;gap:15px;font-size:12px}
+.left{width:70%;float:left;padding:10px;height:calc(100vh - 70px);overflow-y:auto;border-right:1px solid #00ff66}
+.right{width:30%;float:right;padding:10px;background:#080808;height:calc(100vh - 70px)}
+.red{color:#ff0033}.yellow{color:#ffcc00}.blue{color:#00aaff}.white{color:#fff}
+.box{border:1px solid #00ff66;margin:10px 0;padding:8px;background:rgba(0,255,102,.06)}
+.box2{border:1px solid #ffcc00;margin:10px 0;padding:8px;background:rgba(255,204,0,.08)}
+.wanted{border:3px solid #ff0033;background:#1a0000;padding:10px;text-align:center;animation:blinkBorder 1s infinite}
+@keyframes blinkBorder{50%{border-color:#ffcc00}}
+.bar{height:14px;background:#222;margin:5px 0}
+.fill{height:100%;background:linear
