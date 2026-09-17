@@ -1,60 +1,86 @@
+// api/top4top.js
+// Vercel Serverless Function (ESM)
+// Endpoint: GET /api/top4top?url=YOUTUBE_URL
+
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
-  const youtubeUrl = req.query.url;
-  if (!youtubeUrl) return res.status(400).json({ error: "url kosong" });
+  res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
-  const id = youtubeUrl.split("v=")[1]?.split("&")[0] || youtubeUrl.split("youtu.be/")[1]?.split("?")[0];
+  if (req.method === "OPTIONS") {
+    return res.status(204).end();
+  }
+
+  if (req.method !== "GET") {
+    return res.status(405).json({
+      error: "Method Not Allowed"
+    });
+  }
+
+  const youtubeUrl = req.query?.url;
+
+  if (!youtubeUrl || typeof youtubeUrl !== "string") {
+    return res.status(400).json({
+      error: "Parameter ?url= wajib diisi."
+    });
+  }
 
   try {
-    // LANGKAH 1: Ambil audio lewat Invidious (bypass blokir Vercel)
-    const invRes = await fetch(`https://vid.puffyan.us/api/v1/videos/${id}`);
-    const invJson = await invRes.json();
-    const audioUrl = invJson.adaptiveFormats?.find(f => f.type.includes("audio"))?.url;
-    const title = invJson.title;
-    const thumb = invJson.videoThumbnails?.[0]?.url;
+    const yupraUrl =
+      `https://api.yupra.my.id/api/downloader/ytmp3?url=${encodeURIComponent(youtubeUrl)}`;
 
-    if (!audioUrl) throw new Error("gagal ambil audio dari invidious");
-
-    // LANGKAH 2: Download audionya jadi buffer
-    const audioBufferRes = await fetch(audioUrl);
-    const arrayBuffer = await audioBufferRes.arrayBuffer();
-
-    // LANGKAH 3: Upload ke Top4Top biar jadi e.top4top.io
-    const form = new FormData();
-    form.append("file", new Blob([arrayBuffer]), `${id}.mp3`);
-
-    const uploadRes = await fetch("https://top4top.io/index.php?do=upload", {
-      method: "POST",
-      body: form,
-      headers: { "User-Agent": "tziii-bb" }
+    const response = await fetch(yupraUrl, {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        "User-Agent": "Vercel-Top4Top-API/1.0"
+      }
     });
 
-    const uploadJson = await uploadRes.json().catch(async () => {
-      const text = await uploadRes.text();
-      // top4top kadang ngasih link di text html, kita cari manual
-      const match = text.match(/https?:\/\/[a-z]\.top4top\.io\/m_[^\s"']+/);
-      return { link: match?.[0] || null };
-    });
+    if (!response.ok) {
+      return res.status(502).json({
+        error: "Yupra API gagal merespons.",
+        status: response.status
+      });
+    }
 
-    const top4topLink = uploadJson.link || uploadJson.url || uploadJson.file;
+    const json = await response.json();
 
-    return res.json({
-      status: "success",
-      title: title,
-      url: top4topLink, // <-- INI YANG BAKAL JADI e.top4top.io
-      link: top4topLink,
-      thumbnail: thumb
-    });
+    // Sesuai format Yupra:
+    // data.data.url -> https://e.top4top.io/xxx.mp3
+    const data = json?.data;
 
-  } catch (e) {
-    // FALLBACK: kalo upload top4top gagal (limit 4.5MB di Vercel), kasih direct link dulu
+    if (!data?.url) {
+      return res.status(502).json({
+        error: "URL Top4Top tidak ditemukan pada response Yupra."
+      });
+    }
+
+    const top4topUrl = data.url;
+
+    const title =
+      data.title ??
+      data.name ??
+      json?.title ??
+      "";
+
+    const thumbnail =
+      data.thumbnail ??
+      data.thumb ??
+      data.image ??
+      json?.thumbnail ??
+      "";
+
     return res.status(200).json({
-      status: "fallback",
-      title: "fallback audio",
-      url: `https://vid.puffyan.us/latest_version?id=${id}&itag=140`,
-      link: `https://vid.puffyan.us/latest_version?id=${id}&itag=140`,
-      error: e.message,
-      note: "upload top4top gagal, pake link direct dulu. Coba lagu yang durasinya < 3 menit biar kekejar upload top4top"
+      title,
+      url: top4topUrl,
+      thumbnail
+    });
+  } catch (error) {
+    console.error("Top4Top API error:", error);
+
+    return res.status(500).json({
+      error: "Terjadi kesalahan saat mengambil data."
     });
   }
       }
